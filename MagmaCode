@@ -1,0 +1,64 @@
+
+p:=2;
+M:= MatrixRing(Integers(),4);
+Amatrices:=[];
+Append(~Amatrices,M!Matrix([[2,0,0,0],[0,2,0,0],[0,0,2,0],[0,0,0,2]]));
+Append(~Amatrices,M!Matrix([[2,1,1,0],[1,2,0,0],[1,0,2,0],[0,0,0,4]]));
+Pmatrices:=[];
+Append(~Pmatrices,M!Matrix([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,p]]));
+for a in [0..p-1] do
+    Append(~Pmatrices,M!Matrix([[1,0,0,0],[0,1,0,0],[0,0,p,a],[0,0,0,1]]));
+    for b in [0..p-1] do
+        Append(~Pmatrices,M!Matrix([[1,0,0,0],[0,p,a,b],[0,0,1,0],[0,0,0,1]]));
+        for c in [0..p-1] do
+            Append(~Pmatrices,M!Matrix([[p,a,b,c],[0,1,0,0],[0,0,1,0],[0,0,0,1]]));
+        end for;
+    end for;
+end for;
+
+Iterations:=3;
+Genera:=[];
+
+for k in [1..Iterations] do
+    Genera_iter:=[];
+    Matrices:=[];
+    for P in Pmatrices do
+        for A in Amatrices do
+            Append(~Matrices,Transpose(P)*A*P);
+        end for;
+    end for;
+    Genera_temp:=[];
+    for M in Matrices do
+        Append(~Genera_temp,Genus(LatticeWithGram(M)));
+    end for;
+    Index:=[];
+    for i in [1..#Genera_temp] do
+        G:=Genera_temp[i];
+        if not i in Index then
+            Append(~Genera_iter,G);
+            for j in [i+1..#Genera_temp] do
+                if not j in Index then
+                    if G eq Genera_temp[j] then
+                        Append(~Index,j);
+                    end if;
+                end if;
+            end for;
+            Append(~Index,i);
+        end if;
+    end for;
+    Append(~Genera,Genera_iter);
+    if k lt Iterations then
+        Classes_iter:=[];
+        for G in Genera_iter do
+            R:=Representatives(G);
+            for j in [1..#R] do
+               Append(~Classes_iter,R[j]);
+            end for;
+        end for;
+        Amatrices:=[];
+        for C in Classes_iter do
+            Append(~Amatrices,GramMatrix(C));
+        end for;
+    end if;
+    print #Genera;
+end for;
